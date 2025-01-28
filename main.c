@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <string.h>
-
+// Example change
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         printf("Usage: %s <file_path>\n", argv[0]);
