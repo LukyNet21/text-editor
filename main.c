@@ -47,8 +47,6 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    SDL_SetRenderDrawColor(renderer, 0, 128, 255, 255);
-
     TTF_Font* font = TTF_OpenFont("../assets/Arial.ttf", 24);
     if (font == NULL) {
         SDL_DestroyRenderer(renderer);
@@ -64,12 +62,16 @@ int main(int argc, char* argv[]) {
     int quit = 0;
     SDL_Event e;
 
-    char line[256];
+    char line[1024];
     SDL_Color textColor = {255, 255, 255};
     int yOffset = 0;
 
-    char fileContent[1024];
+    char fileContent[10240];
     int fileIndex = 0;
+
+    int cursor_status = 1;
+    Uint32 lastSwitchTime = 0;
+    int cursorCharX = 0;
 
     while (fgets(line, sizeof(line), file)) {
         for (int i = 0; line[i] != '\0'; ++i) {
@@ -77,6 +79,14 @@ int main(int argc, char* argv[]) {
         }
     }
     fileContent[fileIndex] = '\0';
+
+    char* lines[100];
+    int lineCount = 0;
+    char* token = strtok(fileContent, "\n");
+    while (token != NULL) {
+        lines[lineCount++] = token;
+        token = strtok(NULL, "\n");
+    }
 
     while (!quit) {
         while (SDL_PollEvent(&e) != 0) {
@@ -92,18 +102,32 @@ int main(int argc, char* argv[]) {
                     // printf("%d, %d\n", e.motion.x, e.motion.y);
                     break;
                 case SDL_KEYDOWN:
-
-
                     switch (e.key.keysym.sym) {
                         case SDLK_UP:
                             printf("UP!\n");
                             break;
+                        case SDLK_DOWN:
+                            printf("DOWN!\n");
+                            break;
+                        case SDLK_RIGHT:
+                            if (cursorCharX < fileIndex) {
+                                cursorCharX++;
+                            }
+                            break;
+                        case SDLK_LEFT:
+                            if (cursorCharX > 0) {
+                                cursorCharX--;
+                            }
+                            break;
+
                     }
 
                     break;
             }
         }
 
+
+        SDL_SetRenderDrawColor(renderer, 0, 128, 255, 255);
         SDL_RenderClear(renderer);
 
         yOffset = 0;
@@ -115,7 +139,7 @@ int main(int argc, char* argv[]) {
                 lineEnd++;
             }
 
-            char currentLine[256];
+            char currentLine[1024];
             int lineLength = lineEnd - contentIndex;
             strncpy(currentLine, &fileContent[contentIndex], lineLength);
             currentLine[lineLength] = '\0';
@@ -134,13 +158,35 @@ int main(int argc, char* argv[]) {
             yOffset += textSurface->h;
             contentIndex = lineEnd + 1;
 
+            if (yOffset <= textSurface->h) {
+                Uint32 currentTime = SDL_GetTicks();
+                if (currentTime - lastSwitchTime >= 250) {
+                    cursor_status = 1 - cursor_status;
+                    lastSwitchTime = currentTime;
+                }
+
+                int cursorLineX = 50;
+                for (int i = 0; i < cursorCharX; ++i) {
+                    char currentChar[2] = {currentLine[i], '\0'};
+                    int charWidth;
+                    TTF_SizeText(font, currentChar, &charWidth, NULL);
+                    cursorLineX += charWidth;
+                }
+
+                if (cursor_status) {
+                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                    SDL_Rect cursorRect = {cursorLineX, 50, 1, textSurface->h};
+                    SDL_RenderFillRect(renderer, &cursorRect);
+                }
+            }
             SDL_FreeSurface(textSurface);
         }
 
         SDL_RenderPresent(renderer);
 
-        // SDL_Delay(16);
+        SDL_Delay(16);
     }
+
 
     fclose(file);
     TTF_CloseFont(font);
