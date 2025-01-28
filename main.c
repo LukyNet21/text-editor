@@ -83,6 +83,25 @@ int main(int argc, char* argv[]) {
             if (e.type == SDL_QUIT) {
                 quit = 1;
             }
+
+            switch (e.type) {
+                case SDL_QUIT:
+                    quit = 1;
+                    break;
+                case SDL_MOUSEMOTION:
+                    // printf("%d, %d\n", e.motion.x, e.motion.y);
+                    break;
+                case SDL_KEYDOWN:
+
+
+                    switch (e.key.keysym.sym) {
+                        case SDLK_UP:
+                            printf("UP!\n");
+                            break;
+                    }
+
+                    break;
+            }
         }
 
         SDL_RenderClear(renderer);
@@ -120,7 +139,7 @@ int main(int argc, char* argv[]) {
 
         SDL_RenderPresent(renderer);
 
-        SDL_Delay(100);
+        // SDL_Delay(16);
     }
 
     fclose(file);
