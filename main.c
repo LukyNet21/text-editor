@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
 
     SDL_Window* window = SDL_CreateWindow("File Explorer",
                                           SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                          800, 600, SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN);
+                                          800, 600, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (window == NULL) {
         TTF_Quit();
         SDL_Quit();
